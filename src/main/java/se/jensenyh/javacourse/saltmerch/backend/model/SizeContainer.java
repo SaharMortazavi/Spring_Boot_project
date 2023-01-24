@@ -2,8 +2,19 @@ package se.jensenyh.javacourse.saltmerch.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class SizeContainer
-{
+public class SizeContainer {
+    @JsonProperty
+    public String size;
+    @JsonProperty
+    public int stock;
+
+    public SizeContainer() {
+    }
+
+    public SizeContainer(String size, int stock) {
+        this.size = size;
+        this.stock = stock;
+    }
     // todo: needs fields: String size, int stock
     
     // todo: all fields should be public and annotated with @JsonProperty

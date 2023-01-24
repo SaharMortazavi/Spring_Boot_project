@@ -5,51 +5,47 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import se.jensenyh.javacourse.saltmerch.backend.model.ColorVariant;
+import se.jensenyh.javacourse.saltmerch.backend.model.Product;
+import se.jensenyh.javacourse.saltmerch.backend.model.SizeContainer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import se.jensenyh.javacourse.saltmerch.backend.model.ColorVariant;
-import se.jensenyh.javacourse.saltmerch.backend.model.Product;
-import se.jensenyh.javacourse.saltmerch.backend.model.SizeContainer;
-
+@Repository
 public class ProductRepository
 {
+    @Autowired
+    JdbcTemplate jdbcTemplate;
     // NOTE: LEAVE THIS RECORD AS IT IS!
     private record VariantWImages(int id, String colorName, String imagesCsv) {}
-    
-    
-    
+
     /** Only calls selectAll(String category) with a null category;
      * Useful for reading ALL products, regardless of category. */
-    public List<Product> selectAll()
-    {
+    public List<Product> selectAll() {
+
         return selectAll(null);
     }
     
     // todo: this method needs you to write its SQL query
     /** Reads all rows from the products table and returns them as a List of Products. */
-    public List<Product> selectAll(String category)
-    {
+    public List<Product> selectAll(String category) {
         // todo: write an SQL query that only selects all rows from the products table
-        String sql = "";// <<<< todo: WRITE SQL QUERY HERE
-        
-        
-        
+        String sql = "SELECT * FROM products";// <<<< todo: WRITE SQL QUERY HERE
         // NOTE: leave this line as it is!
         if (category != null) sql += " WHERE category = (:category)";
-        
-        
-        
         // todo: create a RowMapper for the Product class,
         //  using the constructor that takes id, category, title, description, and previewImage
         // NOTE: have in mind that the column name that corresponds to previewImage is preview_image
-        RowMapper<Product> rm = null;// <<<< todo: CREATE RowMapper HERE
-        
-        
-        
+        RowMapper<Product> rm =(rs, rowNum)-> new Product(
+                rs.getInt("id") ,
+                rs.getString("category"),
+                rs.getString("title"),
+                rs.getString("description"),
+                rs.getString("preview_image"));
+
+//         <<<< todo: CREATE RowMapper HERE
         // NOTE: leave the rest as it is!
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("category", category);
@@ -60,15 +56,28 @@ public class ProductRepository
      * Useful for reading all products of a specific category. */
     public List<Product> selectAllOfCategory(String category)
     {
+
         return selectAll(category);
     }
+
+/** I add bellow method myself.*/
+//    public Product selectProductById(int id){
+//        String sql="SELECT * FROM products WHERE id = ?";
+//        RowMapper<Product> rm=(rs,rowNum) -> new Product(
+//                rs.getInt("id"),
+//                rs.getString("category"),
+//                rs.getString("title"),
+//                rs.getString("description"),
+//                rs.getString("preview_image"));
+//        return jdbcTemplate.queryForObject(sql,rm,id);
+//    }
     
     // NOTE: NO NEED TO MODIFY THIS METHOD!
     /** Inserts a new product in the database, together with its
      *      variants, including images and sizes. It takes a
      *      Product parameter containing everything. */
-    public Product insertProductAndProps(Product prod, String category)
-    {
+    public Product insertProductAndProps(Product prod, String category) {
+
         var sql = """
                 INSERT INTO products (category, title, description, preview_image)
                 VALUES (?, ?, ?, ?) RETURNING id;""";
@@ -78,8 +87,7 @@ public class ProductRepository
         int pid = pids.size() > 0 ? pids.get(0) : -1;
         
         Product newProd = null;
-        if (pid > -1)
-        {
+        if (pid > -1) {
             newProd = new Product();
             newProd.id = pid;
             newProd.category = category;
@@ -87,8 +95,7 @@ public class ProductRepository
             newProd.description = prod.description;
             newProd.previewImage = prod.previewImage;
             
-            for (ColorVariant v : prod.colorVariants)
-            {
+            for (ColorVariant v : prod.colorVariants) {
                 ColorVariant newv = new ColorVariant();
                 RowMapper<Integer> rmv = (rs, rowNum) -> rs.getInt("id");
                 var sqlv = """
@@ -96,20 +103,17 @@ public class ProductRepository
                 List<Integer> vids = jdbcTemplate.query(sqlv, rmv, v.colorName, pid);
                 int vid = vids.size() > 0 ? vids.get(0) : -1;
                 
-                if (vid > -1)
-                {
+                if (vid > -1) {
                     newv.colorName = v.colorName;
                     
-                    for (String url : v.images)
-                    {
+                    for (String url : v.images) {
                         var sqli = """
                                 INSERT INTO images (url, variant_id) VALUES (?, ?);""";
                         int ires = jdbcTemplate.update(sqli, url, vid);
                         if (ires == 1)
                             newv.images.add(url);
                     }
-                    for (SizeContainer s : v.sizes)
-                    {
+                    for (SizeContainer s : v.sizes) {
                         var sqls = """
                                 INSERT INTO sizes (size, stock, variant_id) VALUES (?, ?, ?);""";
                         int sres = jdbcTemplate.update(sqls, s.size, s.stock, vid);
@@ -154,6 +158,7 @@ public class ProductRepository
     {
         // todo: write the SQL query for deleting a single product
         var sql = """
+                DELETE product WHERE id=?;
                 """;// <<<< todo: WRITE SQL QUERY HERE
         
         
@@ -178,7 +183,7 @@ public class ProductRepository
         {
             ColorVariant colorVariant = new ColorVariant();
             colorVariant.colorName = variantWImages.colorName;
-            colorVariant.sizes = getVariantSizes(variantWImages.id);
+            colorVariant.sizes = (ArrayList<SizeContainer>) getVariantSizes(variantWImages.id);
             try
             {
                 colorVariant.setImagesFromCSV(variantWImages.imagesCsv);

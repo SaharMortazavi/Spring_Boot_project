@@ -551,7 +551,7 @@ Example of a request body `action=remove`:
 
 ---
 
-<br>
+<br>  
 
 ### Clear cart contents (and potentially restock)
 ```http
