@@ -25,19 +25,21 @@ public class CartController {
     }
 
     @PatchMapping("carts/{id}")
-    public Object addOrDelete(@PathVariable(required = false) int id, @RequestParam String action, @RequestBody CartItem item) {
+    public Object addOrDelete(@PathVariable(required = false) int id, @RequestParam String action,@RequestBody CartItem item) {
         if (action.equals("add")) {
             return cartService.addOrIncrementItem(item);
+//            new ResponseEntity<>(cartService.addOrIncrementItem(item), HttpStatus.OK);
         } else if (action.equals("remove")){
             return cartService.deleteOrDecrementItem(item);
+//            new ResponseEntity<>(cartService.deleteOrDecrementItem(item), HttpStatus.OK);
         }return null;
     }
 
     @DeleteMapping("carts/{id}")
-    public void deleteAllCartItems(@PathVariable(required = false) int id, @RequestParam(defaultValue ="") String byeOut, @RequestBody CartItem item){
-        if (byeOut.equals("true")){
+    public void deleteAllCartItems(@PathVariable(required = false) int id, @RequestParam(defaultValue ="") String buyout,@RequestBody CartItem item){
+        if (buyout.equals("true")){
             cartService.deleteAllCartItemsByeOut(true);
-        } else if (byeOut.equals("")) {
+        } else if (buyout.equals("")) {
             cartService.deleteAllCartItemRestock(false);
         }
 }
