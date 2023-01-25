@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.*;
 import se.jensenyh.javacourse.saltmerch.backend.model.CartItem;
 import se.jensenyh.javacourse.saltmerch.backend.service.CartService;
 
+import java.util.List;
+
 @CrossOrigin(origins="http://localhost:3010")
 @RestController
 public class CartController {
@@ -17,6 +19,10 @@ public class CartController {
 //        return cartService.deleteOrDecrementItem(item);
 //
 //    }
+    @GetMapping ("/carts")
+    public List<CartItem> getAllCartItem() {
+        return cartService.getAllCartItem();
+    }
 
     @PatchMapping("carts/{id}")
     public Object addOrDelete(@PathVariable(required = false) int id, @RequestParam String action, @RequestBody CartItem item) {

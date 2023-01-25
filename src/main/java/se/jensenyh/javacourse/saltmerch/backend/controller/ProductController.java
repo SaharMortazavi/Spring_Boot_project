@@ -42,7 +42,7 @@ public class ProductController {
     }
     @GetMapping("products/tshirts")
     public List<Product> selectAllTshirts() {
-        return productService.selectAllOfCategoryJackets();
+        return productService.selectAllOfCategoryTshirts();
     }
     @GetMapping("products/{id}")
     public Object getProductById(@PathVariable ("id") int id){

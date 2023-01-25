@@ -27,7 +27,7 @@ public class ProductService {
         return proDb.selectAllOfCategory("jackets");
     }
     public List<Product> selectAllOfCategoryTshirts(){
-        return proDb.selectAllOfCategory("t_Shirts");
+        return proDb.selectAllOfCategory("tShirts");
     }
     public Object selectProductById(int id){
         return proDb.getEntireProduct(id);
