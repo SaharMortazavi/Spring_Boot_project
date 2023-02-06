@@ -36,7 +36,7 @@ public class CartController {
     }
 
     @DeleteMapping("carts/{id}")
-    public void deleteAllCartItems(@PathVariable(required = false) int id, @RequestParam(defaultValue ="") String buyout,@RequestBody CartItem item){
+    public void deleteAllCartItems(@PathVariable(required = false) int id, @RequestParam(defaultValue ="") String buyout){
         if (buyout.equals("true")){
             cartService.deleteAllCartItemsByeOut(true);
         } else if (buyout.equals("")) {
